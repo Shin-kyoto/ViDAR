@@ -1,0 +1,166 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "ego-motion",
+  "steps": [
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/detectors/bevformer.py",
+      "description": "tmp_posというのがある．これはego motionらしい．\n推論時，BEV featuresとego motionは保存されている．論文のFigure 5を見るとたしかに必要そう",
+      "line": 320
+    },
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/detectors/bevformer.py",
+      "description": "tmp_posは，img_netasの中の，['can_bus']にはいっているらしい．x, y, z, yawの四次元であると考えられる．\n次に，どうやってモデル内で処理されているのかを追っていく",
+      "line": 309
+    },
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/detectors/bevformer.py",
+      "description": "この関数がimg_metasを処理している．",
+      "line": 318
+    },
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/detectors/bevformer.py",
+      "description": "simple_testはsimple_test_ptsを呼んでいる．\nsimple_test_ptsはpts_bbox_head.get_bboxesを呼んでいる．pts_bbox_headとはどんなクラスなのかを追う．\n",
+      "line": 326
+    },
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/detectors/bevformer.py",
+      "description": "pts_bbox_headについてはconfigに書いてある．configを一つ例として選択し，BEVFormerのpts_bbox_headを追う．\n\n現状の目標: BEVFormerのpts_bbox_headに格納されたクラスの中にある，get_bboxesを確認すること．その第2引数がimg_metasであり，その中のcan_busにpositonがある",
+      "line": 37
+    },
+    {
+      "file": "projects/configs/vidar_finetune/nusc_1_4_subset/vidar_1_8_nusc_1future.py",
+      "description": "ここがpts_bbox_head\n\n現状の目標: BEVFormerのpts_bbox_headに格納されたクラスの中にある，get_bboxesを確認すること．その第2引数がimg_metasであり，その中のcan_busにpositonがある",
+      "line": 69
+    },
+    {
+      "file": "projects/configs/vidar_finetune/nusc_1_4_subset/vidar_1_8_nusc_1future.py",
+      "description": "ふと見てみると，use_can_busという何やら怪しい単語がある\n一旦目標1は忘れて，こっちを追ってみるのも良さそうだ．これを追うことでpositonの使い方を理解したい．\nuse_can_busを追うために，PerceptionTransformerへ向かう．\n\n現状の目標1. : BEVFormerのpts_bbox_headに格納されたクラス(BEVFormerHead)の中にある，get_bboxesを確認すること．その第2引数がimg_metasであり，その中のcan_busにpositonがある \n\n現状の目標2 : use_can_busという引数を持つ，PerceptionTransformer内に，pos(can_bus)がbevfeatureに加算されている箇所を発見した．posの由来を探る． ",
+      "line": 83
+    },
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/modules/transformer.py",
+      "description": "use_can_busはこれ．\n\n現状の目標: BEVFormerのpts_bbox_headに格納されたクラスの中にある，get_bboxesを確認すること．その第2引数がimg_metasであり，その中のcan_busにpositonがある",
+      "line": 47
+    },
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/modules/transformer.py",
+      "description": "img_metasからcan_busを作り，self.use_can_busとかけてbev_queriesに格納している．\n\n現状の目標1. : BEVFormerのpts_bbox_headに格納されたクラス(BEVFormerHead)の中にある，get_bboxesを確認すること．その第2引数がimg_metasであり，その中のcan_busにpositonがある \n\n現状の目標2 : use_can_busという引数を持つ，PerceptionTransformer内に，pos(can_bus)がbevfeatureに加算されている箇所を発見した．posの由来を探る．",
+      "line": 155
+    },
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/modules/transformer.py",
+      "description": "bev_queriesは，encoderに食われている．\n\n現状の目標1. : BEVFormerのpts_bbox_headに格納されたクラス(BEVFormerHead)の中にある，get_bboxesを確認すること．その第2引数がimg_metasであり，その中のcan_busにpositonがある\n現状の目標2 : use_can_busという引数を持つ，PerceptionTransformer内に，pos(can_bus)がbevfeatureに加算されている箇所を発見した．posの由来を探る．",
+      "line": 183
+    },
+    {
+      "file": "projects/configs/vidar_finetune/nusc_1_4_subset/vidar_1_8_nusc_1future.py",
+      "description": "encoderはこれ．いかつい \n\nこの先は多分論文のFigure5通りだろう．ではそもそも，さっきのposはどこから来たのかを探す．\n\n現状の目標1. : BEVFormerのpts_bbox_headに格納されたクラス(BEVFormerHead)の中にある，get_bboxesを確認すること．その第2引数がimg_metasであり，その中のcan_busにpositonがある \n\n現状の目標2 : use_can_busという引数を持つ，PerceptionTransformer内に，pos(can_bus)がbevfeatureに加算されている箇所を発見した．posの由来を探る． ",
+      "line": 85,
+      "selection": {
+        "start": {
+          "line": 4,
+          "character": 1
+        },
+        "end": {
+          "line": 5,
+          "character": 103
+        }
+      }
+    },
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/modules/transformer.py",
+      "description": "can_busは，img_metasという引数であるようだ\n\n現状の目標1. : BEVFormerのpts_bbox_headに格納されたクラス(BEVFormerHead)の中にある，get_bboxesを確認すること．その第2引数がimg_metasであり，その中のcan_busにpositonがある\n現状の目標2 : use_can_busという引数を持つ，PerceptionTransformer内に，pos(can_bus)がbevfeatureに加算されている箇所を発見した．posの由来を探る．",
+      "line": 157
+    },
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/modules/transformer.py",
+      "description": "get_bev_featuresを呼んでいる箇所を探し，img_metasを特定しよう\n\n現状の目標1. : BEVFormerのpts_bbox_headに格納されたクラス(BEVFormerHead)の中にある，get_bboxesを確認すること．その第2引数がimg_metasであり，その中のcan_busにpositonがある\n現状の目標2 : use_can_busという引数を持つ，PerceptionTransformer内に，pos(can_bus)がbevfeatureに加算されている箇所を発見した．posの由来を探る．",
+      "line": 104
+    },
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/modules/transformer.py",
+      "description": "kwargsを追って，img_metasを特定しよう\n\n現状の目標1. : BEVFormerのpts_bbox_headに格納されたクラス(BEVFormerHead)の中にある，get_bboxesを確認すること．その第2引数がimg_metasであり，その中のcan_busにpositonがある \n\n現状の目標2 : use_can_busという引数を持つ，PerceptionTransformer内に，pos(can_bus)がbevfeatureに加算されている箇所を発見した．posの由来を探る． \n\n現状の目標3 :kwargsを追って，img_metasを特定しよう",
+      "line": 257,
+      "selection": {
+        "start": {
+          "line": 3,
+          "character": 1
+        },
+        "end": {
+          "line": 7,
+          "character": 35
+        }
+      }
+    },
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/modules/transformer.py",
+      "description": "PerceptionTransformerのforwardを探さないといけない．\n\nmmdetは，configを使って，クラスを呼び出している．PerceptionTransformerも，configを通してencoderを設定し，self.encoderという形でforwardを呼び出している． \n\nつまり，PerceptionTransformerのforwardは，PerceptionTransformerを引数に受け取っているクラスの中で呼ばれているはずだ．\n\n現状の目標1. : BEVFormerのpts_bbox_headに格納されたクラス(BEVFormerHead)の中にある，get_bboxesを確認すること．その第2引数がimg_metasであり，その中のcan_busにpositonがある \n\n現状の目標2 : use_can_busという引数を持つ，PerceptionTransformer内に，pos(can_bus)がbevfeatureに加算されている箇所を発見した．posの由来を探る． \n\n現状の目標3 :kwargsを追って，img_metasを特定しよう",
+      "line": 200
+    },
+    {
+      "file": "projects/configs/vidar_finetune/nusc_1_4_subset/vidar_1_8_nusc_1future.py",
+      "description": "PerceptionTransformerのforwardは，BEVFormerHeadが呼んでいると考えられる．BEVFormerHeadのtransformerという名前の引数を追う．その中でPerceptionTransformerがメンバとなっており，forwardが呼ばれているはずだ．\n\n現状の目標1. : BEVFormerのpts_bbox_headに格納されたクラス(BEVFormerHead)の中にある，get_bboxesを確認すること．その第2引数がimg_metasであり，その中のcan_busにpositonがある \n\n現状の目標2 : use_can_busという引数を持つ，PerceptionTransformer内に，pos(can_bus)がbevfeatureに加算されている箇所を発見した．posの由来を探る． \n\n現状の目標3 :kwargsを追って，img_metasを特定しよう \n\n現状の目標4 :img_metasを特定するために，PerceptionTransformerのforwardが呼ばれている場所を探し，img_metasが誰から渡ってきたのかを探る．",
+      "line": 80,
+      "selection": {
+        "start": {
+          "line": 3,
+          "character": 1
+        },
+        "end": {
+          "line": 9,
+          "character": 93
+        }
+      }
+    },
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/dense_heads/bevformer_head.py",
+      "description": "transformerという引数が確かにある\n\n現状の目標1. : BEVFormerのpts_bbox_headに格納されたクラス(BEVFormerHead)の中にある，get_bboxesを確認すること．その第2引数がimg_metasであり，その中のcan_busにpositonがある \n\n現状の目標2 : use_can_busという引数を持つ，PerceptionTransformer内に，pos(can_bus)がbevfeatureに加算されている箇所を発見した．posの由来を探る． \n\n現状の目標3 :kwargsを追って，img_metasを特定しよう \n\n現状の目標4 :img_metasを特定するために，PerceptionTransformerのforwardが呼ばれている場所を探し，img_metasが誰から渡ってきたのかを探る．",
+      "line": 33
+    },
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/dense_heads/bevformer_head.py",
+      "description": "transformerはここにわたっている \n\nだが，これ以上追っても，ネストの海をさまよい続けるだけだろう",
+      "line": 65
+    },
+    {
+      "file": "projects/mmdet3d_plugin/bevformer/runner/epoch_based_runner.py",
+      "description": "これ以上追っても，ネストの海をさまよい続けるだけだろうという気もしたので，img_metasで検索してみた．するとどうだろう，datasetのロード部分でimg_metasが存在する．これでは？",
+      "line": 76
+    },
+    {
+      "file": "projects/mmdet3d_plugin/datasets/nuplan_vidar_dataset_v1.py",
+      "description": "img_metasがnuplanのdataset内にも記載されている",
+      "line": 40
+    },
+    {
+      "file": "projects/mmdet3d_plugin/datasets/nuscenes_dataset.py",
+      "description": "img_metasはnuscenesにもある．そしてどうやら，DCクラスが返している．DCクラスとは？",
+      "line": 130
+    },
+    {
+      "file": "projects/mmdet3d_plugin/datasets/nuscenes_dataset.py",
+      "description": "DataContainerがDCだった．これはmmcvのクラスなので深追いしない．",
+      "line": 14
+    },
+    {
+      "file": "projects/mmdet3d_plugin/datasets/nuscenes_dataset.py",
+      "description": "このmetas_mapをDataContainerに食わせていた．その大本はqueueだ",
+      "line": 113
+    },
+    {
+      "file": "projects/mmdet3d_plugin/datasets/nuscenes_dataset.py",
+      "description": "queueは，input_dictから作られている．get_data_infoが返している．どうもmmdet3dの知見が通用する領域に来たような気がする．",
+      "line": 98
+    },
+    {
+      "file": "projects/mmdet3d_plugin/datasets/nuscenes_dataset.py",
+      "description": "get_data_infoの返り値がどのようなデータなのかを確認する．",
+      "line": 134
+    },
+    {
+      "file": "projects/mmdet3d_plugin/datasets/nuscenes_dataset.py",
+      "description": "ビンゴ！can_busに，posとangleが格納されている． \n\nつまり，datasetから得られた情報を，ego-motion conditionに使っているのだろう．",
+      "line": 217
+    }
+  ]
+}
